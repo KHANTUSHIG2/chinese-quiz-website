@@ -270,19 +270,93 @@
   <div id="root"></div>
 
 <script>
-// ── STORAGE ──────────────────────────────────────────────────────────────────
+// ── FIREBASE CONFIG ───────────────────────────────────────────────────────────
+// Setup (free, 2 minutes):
+// 1. Go to https://console.firebase.google.com → Add project
+// 2. Build → Realtime Database → Create database → Start in TEST mode
+// 3. Copy the URL shown (e.g. https://your-app-default-rtdb.firebaseio.com)
+// 4. Paste it below replacing the empty string, then redeploy
+const FIREBASE_URL = 'https://chinese-quiz-website-default-rtdb.asia-southeast1.firebasedatabase.app';
+
+// ── REMOTE SYNC ───────────────────────────────────────────────────────────────
+const REMOTE = {
+  ok(){ return typeof FIREBASE_URL==='string' && FIREBASE_URL.length>0; },
+  async get(k){
+    try{const r=await fetch(`${FIREBASE_URL}/${k}.json`);return r.ok?await r.json():null;}catch{return null;}
+  },
+  async set(k,v){
+    try{await fetch(`${FIREBASE_URL}/${k}.json`,{method:'PUT',headers:{'Content-Type':'application/json'},body:JSON.stringify(v)});}catch{}
+  },
+  async del(k){
+    try{await fetch(`${FIREBASE_URL}/${k}.json`,{method:'DELETE'});}catch{}
+  }
+};
+
+// Firebase stores arrays as objects {0:…,1:…} — convert back to array
+function toArr(v){
+  if(v===null||v===undefined)return null;
+  if(Array.isArray(v))return v;
+  if(typeof v==='object')return Object.values(v);
+  return null;
+}
+
+// ── STORAGE ───────────────────────────────────────────────────────────────────
 const STORE = {
   getQuestions(){try{const q=localStorage.getItem('chq_q');return q?JSON.parse(q):null}catch{return null}},
-  setQuestions(q){try{localStorage.setItem('chq_q',JSON.stringify(q))}catch{}},
+  setQuestions(q){
+    try{localStorage.setItem('chq_q',JSON.stringify(q));}catch{}
+    if(REMOTE.ok())REMOTE.set('chq_q',q);
+  },
   getScores(){try{const s=localStorage.getItem('chq_s');return s?JSON.parse(s):[]}catch{return[]}},
-  addScore(e){try{const s=this.getScores();s.push(e);localStorage.setItem('chq_s',JSON.stringify(s))}catch{}},
-  clearScores(){try{localStorage.removeItem('chq_s')}catch{}},
+  addScore(e){
+    try{const s=this.getScores();s.push(e);localStorage.setItem('chq_s',JSON.stringify(s));if(REMOTE.ok())REMOTE.set('chq_s',s);}catch{}
+  },
+  clearScores(){
+    try{localStorage.removeItem('chq_s');}catch{}
+    if(REMOTE.ok())REMOTE.set('chq_s',[]);
+  },
   getSettings(){try{const s=localStorage.getItem('chq_cfg');return s?JSON.parse(s):{numQuestions:15,adminPassword:'teacher123'}}catch{return{numQuestions:15,adminPassword:'teacher123'}}},
-  setSettings(s){try{localStorage.setItem('chq_cfg',JSON.stringify(s))}catch{}},
+  setSettings(s){
+    try{localStorage.setItem('chq_cfg',JSON.stringify(s));}catch{}
+    if(REMOTE.ok())REMOTE.set('chq_cfg',s);
+  },
   getActive(){try{const a=localStorage.getItem('chq_active');return a?JSON.parse(a):null}catch{return null}},
-  setActive(a){try{localStorage.setItem('chq_active',JSON.stringify(a))}catch{}},
-  clearActive(){try{localStorage.removeItem('chq_active')}catch{}}
+  setActive(a){
+    try{localStorage.setItem('chq_active',JSON.stringify(a));}catch{}
+    if(REMOTE.ok())REMOTE.set('chq_active',a);
+  },
+  clearActive(){
+    try{localStorage.removeItem('chq_active');}catch{}
+    if(REMOTE.ok())REMOTE.del('chq_active');
+  }
 };
+
+// ── APP INIT (sync from Firebase before first render) ─────────────────────────
+async function initApp(){
+  if(REMOTE.ok()){
+    try{
+      const [q,s,cfg,act]=await Promise.all([
+        REMOTE.get('chq_q'),REMOTE.get('chq_s'),
+        REMOTE.get('chq_cfg'),REMOTE.get('chq_active')
+      ]);
+      const synced=localStorage.getItem('chq_synced');
+      const qArr=toArr(q);
+      if(qArr!==null){
+        localStorage.setItem('chq_q',JSON.stringify(qArr));
+      } else if(synced){
+        // Previously synced but now empty — teacher deleted all questions
+        localStorage.setItem('chq_q',JSON.stringify([]));
+      }
+      const sArr=toArr(s)||[];
+      localStorage.setItem('chq_s',JSON.stringify(sArr));
+      if(cfg)localStorage.setItem('chq_cfg',JSON.stringify(cfg));
+      if(act)localStorage.setItem('chq_active',JSON.stringify(act));
+      else localStorage.removeItem('chq_active');
+      localStorage.setItem('chq_synced','1');
+    }catch(e){console.warn('Firebase sync failed, using local storage',e);}
+  }
+  route();
+}
 
 // ── DEFAULT QUESTIONS ────────────────────────────────────────────────────────
 const DEFAULTS = [
@@ -435,7 +509,7 @@ function route(){
   renderHome();
 }
 window.addEventListener('hashchange',route);
-window.addEventListener('load',route);
+window.addEventListener('load',initApp);
 
 // ── HOME ─────────────────────────────────────────────────────────────────────
 function renderHome(){
@@ -690,7 +764,16 @@ function drawTV(){
   },0);
 }
 
-function pollTV(){
+async function pollTV(){
+  if(REMOTE.ok()){
+    try{
+      const [s,act]=await Promise.all([REMOTE.get('chq_s'),REMOTE.get('chq_active')]);
+      const sArr=toArr(s)||[];
+      localStorage.setItem('chq_s',JSON.stringify(sArr));
+      if(act)localStorage.setItem('chq_active',JSON.stringify(act));
+      else localStorage.removeItem('chq_active');
+    }catch{}
+  }
   const scores=STORE.getScores();
   const fresh=scores.filter(s=>s.timestamp>lastSeen);
   if(fresh.length){
