@@ -175,6 +175,89 @@
     @keyframes si{from{transform:translateX(40px);opacity:0}to{transform:translateX(0);opacity:1}}
     .si{animation:si .3s ease}
     @keyframes pulse{0%,100%{opacity:.3;transform:scale(.8)}50%{opacity:1;transform:scale(1.2)}}
+
+    /* ── TOUCH & TAP ── */
+    button,a,.opt,.btn,.nl,.tab{
+      touch-action:manipulation;
+      -webkit-tap-highlight-color:transparent;
+    }
+
+    /* ── MOBILE ── */
+    @media(max-width:520px){
+      /* Decorative bg chars too big on phone */
+      body::before,body::after{font-size:160px}
+
+      /* Nav — smaller pills, less gap */
+      #nav{top:10px;right:10px;gap:6px}
+      .nl{padding:6px 12px;font-size:13px}
+
+      /* Root top padding matches smaller nav */
+      #root{padding:64px 12px 32px}
+
+      /* Cards — tighter padding */
+      .card{padding:20px 16px;border-radius:16px}
+
+      /* Banner — scale down */
+      .banner{padding:16px 20px;border-radius:16px}
+      .banner h1{font-size:38px}
+      .banner .sub{font-size:11px;letter-spacing:.15em}
+
+      /* Buttons — full width on small screens, better tap area */
+      .btn{padding:14px 20px;font-size:15px;border-radius:12px;min-height:48px}
+      .btn-lg{padding:16px 20px;font-size:18px}
+      .btn-sm{padding:10px 14px;font-size:13px;min-height:40px}
+
+      /* Inputs — already 16px (no iOS zoom) */
+      input,select{padding:13px 14px;border-radius:12px;font-size:16px}
+
+      /* Quiz Chinese character */
+      .si .zh-char{font-size:56px}
+
+      /* Options — single column, taller tap target */
+      .og{grid-template-columns:1fr;gap:10px;margin:14px 0}
+      .opt{padding:18px 14px;font-size:15px;border-radius:12px;min-height:52px}
+
+      /* Quiz header row — tighter */
+      .quiz-header{font-size:13px}
+
+      /* Quiz nav row — space items properly */
+      .quiz-nav{gap:8px}
+      .quiz-nav .btn{flex:1;padding:14px 8px;font-size:14px}
+      .quiz-nav .pill{font-size:12px;padding:5px 10px;white-space:nowrap}
+
+      /* Score circle — slightly smaller */
+      .sc{width:140px;height:140px}
+
+      /* Result praise text */
+      .result-zh{font-size:38px}
+      .result-en{font-size:18px}
+
+      /* Admin tabs — horizontal scroll instead of wrap */
+      .tabs{flex-wrap:nowrap;overflow-x:auto;-webkit-overflow-scrolling:touch;
+            padding-bottom:4px;gap:6px}
+      .tabs::-webkit-scrollbar{height:3px}
+      .tabs::-webkit-scrollbar-thumb{background:rgba(0,0,0,.2);border-radius:99px}
+      .tab{white-space:nowrap;padding:9px 14px;font-size:13px;flex-shrink:0}
+
+      /* Admin question cards */
+      .qc{flex-direction:column;gap:10px}
+      .qc .btn{width:100%}
+
+      /* Celebration card — tighter on phone */
+      .cc{padding:32px 24px}
+      .cm{font-size:90px}
+
+      /* Field spacing */
+      .field{margin-bottom:16px}
+    }
+
+    /* Mid-range phones / small tablets */
+    @media(min-width:521px) and (max-width:768px){
+      .card{padding:24px 20px}
+      .banner h1{font-size:46px}
+      .og{gap:10px}
+      .opt{padding:16px;font-size:15px}
+    }
   </style>
 </head>
 <body>
@@ -253,7 +336,7 @@ function shuffleQ(q){
 }
 function ensureQ(){
   let q=STORE.getQuestions();
-  if(!q||!q.length){STORE.setQuestions(DEFAULTS);q=DEFAULTS;}
+  if(q===null){STORE.setQuestions(DEFAULTS);q=DEFAULTS;}
   return q;
 }
 function prompt_(t){
@@ -434,7 +517,7 @@ function drawQ(stu){
   R().innerHTML=`
   <div class="container">
     <div class="pbw"><div class="pbf" style="width:${pct}%"></div></div>
-    <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
+    <div class="quiz-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <span style="font-weight:700;font-size:15px">Question ${qCur+1} / ${total}</span>
       <span style="font-weight:600;font-size:14px">👤 ${esc(stu.name)}</span>
     </div>
@@ -442,7 +525,7 @@ function drawQ(stu){
       <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--plum);margin-bottom:8px">
         ${esc(prompt_(q.type))}
       </div>
-      <div style="font-family:'ZCOOL KuaiLe',cursive;font-size:72px;text-align:center;margin:16px 0;line-height:1">
+      <div class="zh-char" style="font-family:'ZCOOL KuaiLe',cursive;font-size:72px;text-align:center;margin:16px 0;line-height:1">
         ${esc(q.zh)}
       </div>
       <div class="og">
@@ -452,9 +535,9 @@ function drawQ(stu){
           </button>`).join('')}
       </div>
     </div>
-    <div style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;gap:12px">
-      <button class="btn btn-ghost" onclick="prevQ()" ${qCur===0?'disabled':''}>← Previous</button>
-      <span class="pill" style="font-size:14px">${answered} / ${total} answered</span>
+    <div class="quiz-nav" style="display:flex;align-items:center;justify-content:space-between;margin-top:20px;gap:12px">
+      <button class="btn btn-ghost" onclick="prevQ()" ${qCur===0?'disabled':''}>← Prev</button>
+      <span class="pill" style="font-size:14px">${answered} / ${total}</span>
       ${isLast
         ?`<button class="btn btn-red" onclick="submitQuiz()">Submit ✓</button>`
         :`<button class="btn btn-ink" onclick="nextQ()">Next →</button>`}
@@ -491,8 +574,8 @@ function renderResult(){
   R().innerHTML=`
   <div class="container" style="text-align:center;padding-top:20px">
     <div style="font-size:80px;margin-bottom:8px">${m}</div>
-    <div style="font-family:'ZCOOL KuaiLe',cursive;font-size:52px;color:var(--red);margin-bottom:4px">${esc(pr.zh)}</div>
-    <div style="font-size:22px;font-weight:700;color:var(--plum);margin-bottom:24px">${esc(pr.en)}</div>
+    <div class="result-zh" style="font-family:'ZCOOL KuaiLe',cursive;font-size:52px;color:var(--red);margin-bottom:4px">${esc(pr.zh)}</div>
+    <div class="result-en" style="font-size:22px;font-weight:700;color:var(--plum);margin-bottom:24px">${esc(pr.en)}</div>
     <div class="sc" style="background:${grad}">
       <div style="position:absolute;inset:10px;background:var(--paper);border-radius:50%;
                   display:flex;flex-direction:column;align-items:center;justify-content:center;border:var(--border)">
@@ -727,23 +810,11 @@ function tabAdd(el){
   el.innerHTML=`
   <div class="card">
     <div class="field">
-      <label>Question Type</label>
-      <select id="atype">
-        <option value="pinyin">pinyin — How do you read this?</option>
-        <option value="translate">translate — What does this mean?</option>
-        <option value="meaning">meaning — What number is this?</option>
-      </select>
-    </div>
-    <div class="field">
-      <label>Chinese Character(s) 汉字</label>
+      <label>Question 题目</label>
       <input type="text" id="azh" placeholder="e.g. 你好" autocomplete="off">
     </div>
-    <div class="field">
-      <label>Hint / Meaning (optional)</label>
-      <input type="text" id="ahint" placeholder="e.g. nǐ hǎo" autocomplete="off">
-    </div>
     <div style="background:rgba(255,182,39,.1);border:2px solid var(--gold);border-radius:8px;padding:10px 14px;font-size:13px;font-weight:600;margin-bottom:16px">
-      ⭐ Option 1 is always the correct answer (options shuffle automatically for students)
+      ⭐ Хариулт 1 нь үргэлж зөв хариулт байдаг. (хариултууд автоматаар холигддоно.)
     </div>
     ${[1,2,3,4].map(n=>`
       <div class="field">
@@ -756,18 +827,15 @@ function tabAdd(el){
 }
 
 function addQ(){
-  const type=document.getElementById('atype').value;
   const zh=document.getElementById('azh').value.trim();
-  const hint=document.getElementById('ahint').value.trim();
   const opts=[1,2,3,4].map(n=>document.getElementById('ao'+n).value.trim());
   const msg=document.getElementById('amsg');
-  if(!zh||opts.some(o=>!o)){msg.innerHTML=`<div class="err">Fill in the Chinese text and all 4 options.</div>`;return;}
+  if(!zh||opts.some(o=>!o)){msg.innerHTML=`<div class="err">Fill in the question and all 4 options.</div>`;return;}
   const qs=ensureQ();
-  qs.push({type,zh,options:opts,answer:0,meaning:hint});
+  qs.push({type:'custom',zh,options:opts,answer:0,meaning:''});
   STORE.setQuestions(qs);
   msg.innerHTML=`<div class="ok">✓ Question added! Total: ${qs.length}</div>`;
   document.getElementById('azh').value='';
-  document.getElementById('ahint').value='';
   [1,2,3,4].forEach(n=>{document.getElementById('ao'+n).value='';});
   document.getElementById('azh').focus();
   setTimeout(()=>renderPanel(),800);
