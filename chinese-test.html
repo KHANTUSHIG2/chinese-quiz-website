@@ -270,12 +270,7 @@
   <div id="root"></div>
 
 <script>
-// ── FIREBASE CONFIG ───────────────────────────────────────────────────────────
-// Setup (free, 2 minutes):
-// 1. Go to https://console.firebase.google.com → Add project
-// 2. Build → Realtime Database → Create database → Start in TEST mode
-// 3. Copy the URL shown (e.g. https://your-app-default-rtdb.firebaseio.com)
-// 4. Paste it below replacing the empty string, then redeploy
+
 const FIREBASE_URL = 'https://chinese-100-test-default-rtdb.firebaseio.com';
 
 // ── REMOTE SYNC ───────────────────────────────────────────────────────────────
@@ -359,37 +354,43 @@ async function initApp(){
 }
 
 // ── DEFAULT QUESTIONS ────────────────────────────────────────────────────────
+const HSK_LEVELS=['HSK 1','HSK 2'];
+const HSK_DESC={
+  'HSK 1':'~150 words · Basic',
+  'HSK 2':'~300 words · Elementary',
+};
+
 const DEFAULTS = [
-  {type:'pinyin',zh:'你好',   options:['nǐ hǎo','xiè xie','zài jiàn','lǎo shī'],  answer:0,meaning:'Hello'},
-  {type:'pinyin',zh:'谢谢',   options:['xiè xie','nǐ hǎo','zài jiàn','xuéshēng'],answer:0,meaning:'Thank you'},
-  {type:'pinyin',zh:'再见',   options:['zài jiàn','nǐ hǎo','xiè xie','míngtiān'],answer:0,meaning:'Goodbye'},
-  {type:'pinyin',zh:'老师',   options:['lǎo shī','xuéshēng','péngyou','jiārén'], answer:0,meaning:'Teacher'},
-  {type:'pinyin',zh:'学生',   options:['xuéshēng','lǎo shī','péngyou','māma'],   answer:0,meaning:'Student'},
-  {type:'translate',zh:'家',  options:['Home / Family','School','Water','Book'],  answer:0,meaning:'jiā'},
-  {type:'translate',zh:'水',  options:['Water','Fire','Earth','Wind'],            answer:0,meaning:'shuǐ'},
-  {type:'translate',zh:'吃',  options:['To eat','To drink','To sleep','To run'],  answer:0,meaning:'chī'},
-  {type:'translate',zh:'书',  options:['Book','Pen','Chair','Table'],             answer:0,meaning:'shū'},
-  {type:'translate',zh:'红色',options:['Red','Blue','Green','Yellow'],            answer:0,meaning:'hóng sè'},
-  {type:'translate',zh:'蓝色',options:['Blue','Red','Green','White'],             answer:0,meaning:'lán sè'},
-  {type:'translate',zh:'绿色',options:['Green','Blue','Yellow','Red'],            answer:0,meaning:'lǜ sè'},
-  {type:'translate',zh:'爸爸',options:['Father / Dad','Mother / Mum','Brother','Sister'],answer:0,meaning:'bà ba'},
-  {type:'translate',zh:'妈妈',options:['Mother / Mum','Father / Dad','Grandma','Grandpa'],answer:0,meaning:'mā ma'},
-  {type:'translate',zh:'猫',  options:['Cat','Dog','Bird','Fish'],                answer:0,meaning:'māo'},
-  {type:'translate',zh:'狗',  options:['Dog','Cat','Horse','Rabbit'],             answer:0,meaning:'gǒu'},
-  {type:'translate',zh:'饭',  options:['Rice / Meal','Bread','Noodles','Soup'],   answer:0,meaning:'fàn'},
-  {type:'translate',zh:'今天',options:['Today','Yesterday','Tomorrow','Now'],     answer:0,meaning:'jīn tiān'},
-  {type:'translate',zh:'明天',options:['Tomorrow','Today','Yesterday','Next week'],answer:0,meaning:'míng tiān'},
-  {type:'translate',zh:'朋友',options:['Friend','Teacher','Student','Family'],    answer:0,meaning:'péngyou'},
-  {type:'translate',zh:'大',  options:['Big / Large','Small','Old','New'],        answer:0,meaning:'dà'},
-  {type:'translate',zh:'小',  options:['Small / Little','Big','Fast','Slow'],     answer:0,meaning:'xiǎo'},
-  {type:'translate',zh:'好',  options:['Good / Well','Bad','Happy','Sad'],        answer:0,meaning:'hǎo'},
-  {type:'translate',zh:'喝',  options:['To drink','To eat','To walk','To talk'],  answer:0,meaning:'hē'},
-  {type:'translate',zh:'看',  options:['To look / watch','To listen','To speak','To write'],answer:0,meaning:'kàn'},
-  {type:'meaning',zh:'一',    options:['1','2','3','4'],   answer:0,meaning:'yī'},
-  {type:'meaning',zh:'三',    options:['3','1','2','5'],   answer:0,meaning:'sān'},
-  {type:'meaning',zh:'五',    options:['5','4','6','7'],   answer:0,meaning:'wǔ'},
-  {type:'meaning',zh:'七',    options:['7','6','8','9'],   answer:0,meaning:'qī'},
-  {type:'meaning',zh:'十',    options:['10','9','8','7'],  answer:0,meaning:'shí'},
+  {type:'pinyin',zh:'你好',   options:['nǐ hǎo','xiè xie','zài jiàn','lǎo shī'],  answer:0,meaning:'Hello',       level:'HSK 1'},
+  {type:'pinyin',zh:'谢谢',   options:['xiè xie','nǐ hǎo','zài jiàn','xuéshēng'],answer:0,meaning:'Thank you',    level:'HSK 1'},
+  {type:'pinyin',zh:'再见',   options:['zài jiàn','nǐ hǎo','xiè xie','míngtiān'],answer:0,meaning:'Goodbye',      level:'HSK 1'},
+  {type:'pinyin',zh:'老师',   options:['lǎo shī','xuéshēng','péngyou','jiārén'], answer:0,meaning:'Teacher',      level:'HSK 1'},
+  {type:'pinyin',zh:'学生',   options:['xuéshēng','lǎo shī','péngyou','māma'],   answer:0,meaning:'Student',      level:'HSK 1'},
+  {type:'translate',zh:'家',  options:['Home / Family','School','Water','Book'],  answer:0,meaning:'jiā',       level:'HSK 1'},
+  {type:'translate',zh:'水',  options:['Water','Fire','Earth','Wind'],            answer:0,meaning:'shuǐ',      level:'HSK 1'},
+  {type:'translate',zh:'吃',  options:['To eat','To drink','To sleep','To run'],  answer:0,meaning:'chī',       level:'HSK 1'},
+  {type:'translate',zh:'书',  options:['Book','Pen','Chair','Table'],             answer:0,meaning:'shū',       level:'HSK 1'},
+  {type:'translate',zh:'爸爸',options:['Father / Dad','Mother / Mum','Brother','Sister'],answer:0,meaning:'bà ba',   level:'HSK 1'},
+  {type:'translate',zh:'妈妈',options:['Mother / Mum','Father / Dad','Grandma','Grandpa'],answer:0,meaning:'mā ma', level:'HSK 1'},
+  {type:'translate',zh:'猫',  options:['Cat','Dog','Bird','Fish'],                answer:0,meaning:'māo',       level:'HSK 1'},
+  {type:'translate',zh:'狗',  options:['Dog','Cat','Horse','Rabbit'],             answer:0,meaning:'gǒu',       level:'HSK 1'},
+  {type:'translate',zh:'饭',  options:['Rice / Meal','Bread','Noodles','Soup'],   answer:0,meaning:'fàn',       level:'HSK 1'},
+  {type:'translate',zh:'今天',options:['Today','Yesterday','Tomorrow','Now'],     answer:0,meaning:'jīn tiān',  level:'HSK 1'},
+  {type:'translate',zh:'明天',options:['Tomorrow','Today','Yesterday','Next week'],answer:0,meaning:'míng tiān',level:'HSK 1'},
+  {type:'meaning',zh:'一',    options:['1','2','3','4'],   answer:0,meaning:'yī',  level:'HSK 1'},
+  {type:'meaning',zh:'三',    options:['3','1','2','5'],   answer:0,meaning:'sān', level:'HSK 1'},
+  {type:'meaning',zh:'五',    options:['5','4','6','7'],   answer:0,meaning:'wǔ',  level:'HSK 1'},
+  {type:'meaning',zh:'七',    options:['7','6','8','9'],   answer:0,meaning:'qī',  level:'HSK 1'},
+  {type:'meaning',zh:'十',    options:['10','9','8','7'],  answer:0,meaning:'shí', level:'HSK 1'},
+  {type:'translate',zh:'红色',options:['Red','Blue','Green','Yellow'],            answer:0,meaning:'hóng sè',   level:'HSK 2'},
+  {type:'translate',zh:'蓝色',options:['Blue','Red','Green','White'],             answer:0,meaning:'lán sè',    level:'HSK 2'},
+  {type:'translate',zh:'绿色',options:['Green','Blue','Yellow','Red'],            answer:0,meaning:'lǜ sè',     level:'HSK 2'},
+  {type:'translate',zh:'朋友',options:['Friend','Teacher','Student','Family'],    answer:0,meaning:'péngyou',   level:'HSK 2'},
+  {type:'translate',zh:'大',  options:['Big / Large','Small','Old','New'],        answer:0,meaning:'dà',        level:'HSK 2'},
+  {type:'translate',zh:'小',  options:['Small / Little','Big','Fast','Slow'],     answer:0,meaning:'xiǎo',      level:'HSK 2'},
+  {type:'translate',zh:'好',  options:['Good / Well','Bad','Happy','Sad'],        answer:0,meaning:'hǎo',       level:'HSK 2'},
+  {type:'translate',zh:'喝',  options:['To drink','To eat','To walk','To talk'],  answer:0,meaning:'hē',        level:'HSK 2'},
+  {type:'translate',zh:'看',  options:['To look / watch','To listen','To speak','To write'],answer:0,meaning:'kàn',level:'HSK 2'},
 ];
 
 // ── HELPERS ──────────────────────────────────────────────────────────────────
@@ -502,6 +503,7 @@ function route(){
   if(!tv&&tvInterval){clearInterval(tvInterval);tvInterval=null;}
   document.body.classList.toggle('tv-mode',tv);
   if(h==='#/'||h==='')return renderHome();
+  if(h==='#/level')return renderLevel();
   if(h==='#/quiz')return renderQuiz();
   if(h==='#/result')return renderResult();
   if(h==='#/tv')return renderTV();
@@ -560,6 +562,61 @@ function startQuiz(){
   const err=document.getElementById('herr');
   if(!name||!cls){err.innerHTML=`<div class="err">Please enter both your name and class! 请填写姓名和班级</div>`;return;}
   sessionStorage.setItem('chq_stu',JSON.stringify({name,cls}));
+  location.hash='#/level';
+}
+
+// ── LEVEL SELECT ──────────────────────────────────────────────────────────────
+function renderLevel(){
+  const stu=JSON.parse(sessionStorage.getItem('chq_stu')||'null');
+  if(!stu){location.hash='#/';return;}
+  const all=ensureQ();
+  const counts={};
+  HSK_LEVELS.forEach(l=>{counts[l]=all.filter(q=>(q.level||'HSK 1')===l).length;});
+
+  R().innerHTML=`
+  <div class="container" style="padding-top:20px">
+    <div style="text-align:center;margin-bottom:8px">
+      <div style="font-size:13px;font-weight:700;color:var(--plum);text-transform:uppercase;letter-spacing:.1em;margin-bottom:4px">Welcome, ${esc(stu.name)}</div>
+    </div>
+    <div class="banner" style="margin-bottom:24px">
+      <div class="bd tl"></div><div class="bd tr"></div>
+      <div class="bd bl"></div><div class="bd br"></div>
+      <h1 style="font-size:36px">选择级别</h1>
+      <div class="sub">CHOOSE YOUR HSK LEVEL</div>
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+      ${HSK_LEVELS.map((lvl,i)=>{
+        const n=counts[lvl]||0;
+        const colors=['var(--jade)','var(--gold)','var(--red)','#7B2D8B','#1565C0','var(--ink)'];
+        const disabled=n===0;
+        return`<button onclick="${disabled?'':'pickLevel(\''+lvl+'\')'}"
+          style="background:var(--paper);border:3px solid ${disabled?'rgba(0,0,0,.15)':colors[i]};border-radius:20px;
+                 padding:20px 16px;text-align:center;cursor:${disabled?'not-allowed':'pointer'};
+                 box-shadow:${disabled?'none':'0 6px 0 '+colors[i]};
+                 opacity:${disabled?.4:1};transition:transform .1s,box-shadow .1s;
+                 touch-action:manipulation;-webkit-tap-highlight-color:transparent"
+          onmouseover="if(!${disabled})this.style.transform='translateY(-3px)'"
+          onmouseout="if(!${disabled})this.style.transform='translateY(0)'"
+          onmousedown="if(!${disabled})this.style.transform='translateY(3px)'"
+          onmouseup="if(!${disabled})this.style.transform='translateY(-3px)'">
+          <div style="font-size:28px;font-weight:900;color:${disabled?'rgba(0,0,0,.25)':colors[i]};font-family:var(--fb);line-height:1">${lvl}</div>
+          <div style="font-size:11px;font-weight:700;color:${disabled?'rgba(0,0,0,.25)':'rgba(0,0,0,.5)'};margin:4px 0 10px;letter-spacing:.03em">${HSK_DESC[lvl]}</div>
+          <div style="display:inline-block;background:${disabled?'rgba(0,0,0,.06)':colors[i]};color:${disabled?'rgba(0,0,0,.3)':'#fff'};
+                      border-radius:999px;padding:3px 12px;font-size:12px;font-weight:800">
+            ${n} question${n!==1?'s':''}
+          </div>
+        </button>`;
+      }).join('')}
+    </div>
+    <div style="text-align:center;margin-top:20px">
+      <a href="#/" style="font-size:13px;font-weight:700;color:var(--plum);text-decoration:none">← Back</a>
+    </div>
+  </div>`;
+}
+
+function pickLevel(lvl){
+  sessionStorage.setItem('chq_level',lvl);
+  qQs=[];qAs=[];qCur=0;
   location.hash='#/quiz';
 }
 
@@ -569,20 +626,24 @@ let qQs=[], qAs=[], qCur=0;
 function renderQuiz(){
   const stu=JSON.parse(sessionStorage.getItem('chq_stu')||'null');
   if(!stu){location.hash='#/';return;}
+  const lvl=sessionStorage.getItem('chq_level')||'HSK 1';
   if(qQs.length===0){
     const cfg=STORE.getSettings();
     const all=ensureQ();
-    const num=Math.min(cfg.numQuestions,all.length);
-    qQs=shuffle(all).slice(0,num).map(shuffleQ);
+    const filtered=all.filter(q=>(q.level||'HSK 1')===lvl);
+    if(!filtered.length){location.hash='#/level';return;}
+    const num=Math.min(cfg.numQuestions,filtered.length);
+    qQs=shuffle(filtered).slice(0,num).map(shuffleQ);
     qAs=new Array(num).fill(-1);
     qCur=0;
-    STORE.setActive({name:stu.name,cls:stu.cls});
+    STORE.setActive({name:stu.name,cls:stu.cls,level:lvl});
   }
-  drawQ(stu);
+  drawQ(stu,lvl);
 }
 
-function drawQ(stu){
+function drawQ(stu,lvl){
   if(!stu)stu=JSON.parse(sessionStorage.getItem('chq_stu'));
+  if(!lvl)lvl=sessionStorage.getItem('chq_level')||'HSK 1';
   const q=qQs[qCur];
   const total=qQs.length;
   const answered=qAs.filter(a=>a!==-1).length;
@@ -593,7 +654,10 @@ function drawQ(stu){
     <div class="pbw"><div class="pbf" style="width:${pct}%"></div></div>
     <div class="quiz-header" style="display:flex;justify-content:space-between;align-items:center;margin-bottom:16px">
       <span style="font-weight:700;font-size:15px">Question ${qCur+1} / ${total}</span>
-      <span style="font-weight:600;font-size:14px">👤 ${esc(stu.name)}</span>
+      <div style="display:flex;align-items:center;gap:8px">
+        <span style="background:var(--red);color:#fff;border-radius:999px;padding:3px 10px;font-size:12px;font-weight:800">${esc(lvl)}</span>
+        <span style="font-weight:600;font-size:14px">👤 ${esc(stu.name)}</span>
+      </div>
     </div>
     <div class="card si">
       <div style="font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--plum);margin-bottom:8px">
@@ -631,7 +695,8 @@ function submitQuiz(){
   const total=qQs.length;
   const pct=Math.round(score/total*100);
   const stu=JSON.parse(sessionStorage.getItem('chq_stu'));
-  const entry={name:stu.name,cls:stu.cls,score,total,pct,timestamp:Date.now()};
+  const lvl=sessionStorage.getItem('chq_level')||'HSK 1';
+  const entry={name:stu.name,cls:stu.cls,score,total,pct,level:lvl,timestamp:Date.now()};
   STORE.addScore(entry);
   STORE.clearActive();
   sessionStorage.setItem('chq_res',JSON.stringify(entry));
@@ -873,9 +938,9 @@ function tabQ(el){
     :qs.map((q,i)=>`
       <div class="qc">
         <div style="flex:1">
-          <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+          <div style="display:flex;align-items:center;gap:6px;margin-bottom:6px;flex-wrap:wrap">
             <span style="font-size:13px;font-weight:700;color:rgba(26,20,35,.4)">#${i+1}</span>
-            <span class="pill" style="font-size:11px;padding:2px 8px">${esc(q.type)}</span>
+            <span style="background:var(--red);color:#fff;border-radius:999px;padding:2px 9px;font-size:11px;font-weight:800">${esc(q.level||'HSK 1')}</span>
           </div>
           <div style="font-family:'ZCOOL KuaiLe',cursive;font-size:32px;line-height:1;margin-bottom:6px">${esc(q.zh)}</div>
           <div style="font-size:13px;color:var(--plum)">✓ ${esc(q.options[q.answer])}</div>
@@ -892,6 +957,12 @@ function delQ(i){
 function tabAdd(el){
   el.innerHTML=`
   <div class="card">
+    <div class="field">
+      <label>HSK Level</label>
+      <select id="alvl">
+        ${HSK_LEVELS.map(l=>`<option value="${l}">${l} — ${HSK_DESC[l]}</option>`).join('')}
+      </select>
+    </div>
     <div class="field">
       <label>Question 题目</label>
       <input type="text" id="azh" placeholder="e.g. 你好" autocomplete="off">
@@ -910,14 +981,15 @@ function tabAdd(el){
 }
 
 function addQ(){
+  const lvl=document.getElementById('alvl').value;
   const zh=document.getElementById('azh').value.trim();
   const opts=[1,2,3,4].map(n=>document.getElementById('ao'+n).value.trim());
   const msg=document.getElementById('amsg');
   if(!zh||opts.some(o=>!o)){msg.innerHTML=`<div class="err">Fill in the question and all 4 options.</div>`;return;}
   const qs=ensureQ();
-  qs.push({type:'custom',zh,options:opts,answer:0,meaning:''});
+  qs.push({type:'custom',zh,options:opts,answer:0,meaning:'',level:lvl});
   STORE.setQuestions(qs);
-  msg.innerHTML=`<div class="ok">✓ Question added! Total: ${qs.length}</div>`;
+  msg.innerHTML=`<div class="ok">✓ Question added to ${esc(lvl)}! Total: ${qs.length}</div>`;
   document.getElementById('azh').value='';
   [1,2,3,4].forEach(n=>{document.getElementById('ao'+n).value='';});
   document.getElementById('azh').focus();
