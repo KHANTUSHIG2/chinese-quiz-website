@@ -739,6 +739,16 @@ function renderTV(){
   if(scores.length>0&&lastSeen===0)
     lastSeen=Math.max(...scores.map(s=>s.timestamp));
   R().innerHTML=`<div class="tvbg" id="tvw"></div>`;
+  // Single delegated listener — survives every drawTV() re-render
+  R().addEventListener('click',e=>{
+    if(e.target&&e.target.id==='tv-refresh')tvReset();
+  });
+  R().addEventListener('mouseover',e=>{
+    if(e.target&&e.target.id==='tv-refresh')e.target.style.background='rgba(255,255,255,.15)';
+  });
+  R().addEventListener('mouseout',e=>{
+    if(e.target&&e.target.id==='tv-refresh')e.target.style.background='rgba(255,255,255,.08)';
+  });
   drawTV();
   if(tvInterval)clearInterval(tvInterval);
   tvInterval=setInterval(pollTV,2000);
@@ -820,13 +830,6 @@ function drawTV(){
       <div style="font-size:13px;color:rgba(255,255,255,.2);margin-top:8px">${scores.length} student${scores.length!==1?'s':''} completed today</div>
     </div>`;
 
-  setTimeout(()=>{
-    const btn=document.getElementById('tv-refresh');
-    if(!btn)return;
-    btn.addEventListener('click',tvReset);
-    btn.addEventListener('mouseover',()=>btn.style.background='rgba(255,255,255,.15)');
-    btn.addEventListener('mouseout',()=>btn.style.background='rgba(255,255,255,.08)');
-  },0);
 }
 
 async function pollTV(){
